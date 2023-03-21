@@ -15,16 +15,28 @@ class NavScreen extends StatefulWidget {
 }
 
 class _NavScreenState extends State<NavScreen> {
-  final miniplayer = Miniplayer(
-    minHeight: _playerMinHeight,
-    maxHeight: MediaQuery
-        .of(context)
-        .size
-        .height,
-    builder: (height, percentage) {
-      return Container();
-    },
-  );
+  late Miniplayer _miniplayer;
+
+  //initialized MiniPlayer in the initState because 
+  // The instance member 'context' can't be accessed in an initializer
+  @override
+  void initState() {
+    _miniplayer = Miniplayer(
+      minHeight: _playerMinHeight,
+      maxHeight: MediaQuery
+          .of(context)
+          .size
+          .height,
+      builder: (height, percentage) {
+        return Container(
+          child: Center(
+            child: Text('$height $percentage'),
+          ),
+        );
+      },
+    );
+    super.initState();
+  }
 
   static const double _playerMinHeight = 60.0;
   int _selectedIndex = 0;
@@ -70,7 +82,10 @@ class _NavScreenState extends State<NavScreen> {
                 )
             )
                 .values
-                .toList(),
+                .toList()..add(Offstage(
+              offstage: selectedVideo == null,
+                child: _miniplayer,
+            )), 
 
           );
         },
