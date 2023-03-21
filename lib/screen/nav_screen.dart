@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:youtube_clone/data.dart';
 import 'package:youtube_clone/screen/home_screen.dart';
+import 'package:miniplayer/miniplayer.dart';
+
+
+final selectedVideoProvider = StateProvider<Video?>((ref) => null);
 
 class NavScreen extends StatefulWidget {
   const NavScreen({Key? key}) : super(key: key);
@@ -9,6 +15,18 @@ class NavScreen extends StatefulWidget {
 }
 
 class _NavScreenState extends State<NavScreen> {
+  final miniplayer = Miniplayer(
+    minHeight: _playerMinHeight,
+    maxHeight: MediaQuery
+        .of(context)
+        .size
+        .height,
+    builder: (height, percentage) {
+      return Container();
+    },
+  );
+
+  static const double _playerMinHeight = 60.0;
   int _selectedIndex = 0;
 
   final _screens = [
@@ -38,17 +56,30 @@ class _NavScreenState extends State<NavScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: _screens.asMap().map((i, screen) => MapEntry(
-            i,
-            Offstage(
-              offstage: _selectedIndex != i,
-              child: screen,
-            ))).values.toList(),
+      body: Consumer(
+        builder: (context, watch, _) {
+          final selectedVideo = watch(selectedVideoProvider).state;
+          return Stack(
+            children: _screens.asMap().map((i, screen) =>
+                MapEntry(
+                    i,
+                    Offstage(
+                      offstage: _selectedIndex != i,
+                      child: screen,
+                    )
+                )
+            )
+                .values
+                .toList(),
+
+          );
+        },
+
       ),
       bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
-          onTap: (i) => setState(() {
+          onTap: (i) =>
+              setState(() {
                 _selectedIndex = i;
               }),
           unselectedFontSize: 10,
